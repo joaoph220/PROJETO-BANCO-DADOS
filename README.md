@@ -55,9 +55,56 @@ preco_unitario 	em ITEM_COMPRA não é redundância. É o preço pago 	naquela c
 
 ## 7. Dicionário de dados
 
+Tabela	Coluna	Tipo	Nulo?	Chave	Regra associada
+categoria	id_categoria	NUMBER	Não	PK	Identity
+categoria	nome	VARCHAR2(50)	Não	UNIQUE	RN2
+fornecedor	id_fornecedor	NUMBER	Não	PK	Identity
+fornecedor	razao_social	VARCHAR2(100)	Não		
+fornecedor	cnpj	CHAR(14)	Não	UNIQUE	RN1
+fornecedor	telefone	VARCHAR2(15)	Sim		
+fornecedor	email	VARCHAR2(100)	Sim		
+produto	id_produto	NUMBER	Não	PK	Identity
+produto	nome	VARCHAR2(100)	Não		
+produto	id_categoria	NUMBER	Não	FK → categoria	RN5
+produto	preco_venda	NUMBER(10,2)	Não		RN3
+produto	estoque_atual	NUMBER(10)	Não		RN6; redundância controlada
+produto	estoque_minimo	NUMBER(10)	Não		Base da consulta de reposição
+produto	ativo	CHAR(1)	Não		CHECK ‘S’ ou ’N’
+produto_fornecedor	id_produto	NUMBER	Não	PK/FK → produto	RN5
+produto_fornecedor	id_fornecedor	NUMBER	Não	PK/FK → fornecedor	RN5
+produto_fornecedor	preco_referencia	NUMBER(10,2)	Não		RN3
+produto_fornecedor	prazo_entrega_dias	NUMBER(3)	Sim		
+compra	id_compra	NUMBER	Não	PK	Identity
+compra	id_fornecedor	NUMBER	Não	FK → fornecedor	RN5
+compra	data_compra	DATE	Não		Default SYSDATE
+compra	status	VARCHAR2(15)	Não		CHECK ABERTA/RECEBIDA/CANCELADA
+item_compra	id_compra	NUMBER	Não	PK/FK → compra	RN5
+item_compra	id_produto	NUMBER	Não	PK/FK → produto	RN5
+item_compra	quantidade	NUMBER(10)	Não		RN4
+item_compra	preco_unitario	NUMBER(10,2)	Não		RN3; preço pago na compra
+movimentacao	id_movimentacao	NUMBER	Não	PK	Identity
+movimentacao	id_produto	NUMBER	Não	FK → produto	RN5
+movimentacao	tipo	VARCHAR2(7)	Não		RN9
+movimentacao	motivo	VARCHAR2(30)	Não		
+movimentacao	quantidade	NUMBER(10)	Não		RN4
+movimentacao	data_mov	DATE	Não		Default SYSDATE
+movimentacao	id_compra	NUMBER	Sim	FK → compra	Nulo em saída por venda
+log_preco	id_log	NUMBER	Não	PK	Identity
+log_preco	id_produto	NUMBER	Não		Preenchido pela trigger (RN8)
+log_preco	preco_antigo	NUMBER(10,2)	Sim		
+log_preco	preco_novo	NUMBER(10,2)	Sim		
+log_preco	data_alteracao	DATE	Sim		Default SYSDATE
 
 ## 8. Regras de negócio
-
+RN1	- O CNPJ do fornecedor não pode repetir	Declarativa: UNIQUE em fornecedor.cnpj
+RN2	- O nome da categoria não pode repetir	Declarativa: UNIQUE em categoria.nome
+RN3	- Preços e valores não podem ser negativos	Declarativa: CHECK (preco >= 0)
+RN4	- A quantidade de um item ou movimentação deve ser maior que zero	Declarativa: CHECK (quantidade > 0)
+RN5	- Um produto não pode ter categoria inexistente; um item não existe sem compra e produto	Referencial: FOREIGN KEY
+RN6	- O estoque nunca pode ficar negativo	CHECK (estoque_atual >= 0) + trigger (a fazer)
+RN7	- Uma saída não pode ser maior que o saldo em estoque	PL/SQL: trigger (a fazer)
+RN8	- Toda mudança de preço de venda fica registrada	PL/SQL: trigger de auditoria (a fazer)
+RN9	- O tipo da movimentação é só ENTRADA ou SAIDA	Declarativa: CHECK
 
 ## 9. Consultas e perguntas de negócio
 
