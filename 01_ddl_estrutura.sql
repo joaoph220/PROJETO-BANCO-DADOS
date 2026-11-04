@@ -22,7 +22,8 @@ CREATE TABLE fornecedor (
     email         VARCHAR2(100),
     CONSTRAINT pk_fornecedor PRIMARY KEY (id_fornecedor),
     CONSTRAINT uq_fornecedor_cnpj UNIQUE (cnpj),
-    CONSTRAINT ck_fornecedor_cnpj CHECK (LENGTH(cnpj) = 14)
+    -- exige 14 dígitos numéricos
+    CONSTRAINT ck_fornecedor_cnpj CHECK (REGEXP_LIKE(cnpj, '^[0-9]{14}$'))
 );
 
 CREATE TABLE produto (
