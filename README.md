@@ -8,8 +8,11 @@
 ---
 
 ## 1. Contexto e problema
+A Atitude é uma pequena empresa familiar que comercializa produtos de limpeza, higienização e descartáveis de uso profissional. O estoque e o lançamento das notas são feitos em um sistema de gestão (ERP) comercial, que atende bem o registro das operações e permite consultar, por exemplo, o gasto com cada fornecedor.
 
+Em conversa com o responsável pela empresa, foi relatado que já ocorreu de produtos ficarem parados em estoque, ou seja, compras de itens que não giraram. As compras são feitas, em geral, com os fornecedores de costume, cujos preço e prazo de entrega já são conhecidos.
 
+O projeto organiza esses dados em um banco relacional consistente e normalizado, capaz de indicar o que precisa ser reposto, identificar produtos sem saída e registrar o histórico de entradas e saídas de cada item, com o motivo. O banco não substitui o ERP: serve como base de apoio ao controle de estoque e à decisão de compra.
 
 ## 2. Usuário / público-alvo
 
