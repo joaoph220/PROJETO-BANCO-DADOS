@@ -37,7 +37,7 @@ Público-alvo: o modelo também serve a outros pequenos comércios que controlam
 
 ## 4. DER (modelo conceitual)
 
-Arquivo: * [Visualizar Modelo Conceitual (DER - PDF)](./modelo_conceitual_der.pdf)
+Arquivo: [Visualizar Modelo Conceitual (DER - PDF)](./modelo_conceitual_der.pdf)
 
 Entidades: Categoria, Fornecedor, Produto, Compra e Movimentacao.
 
