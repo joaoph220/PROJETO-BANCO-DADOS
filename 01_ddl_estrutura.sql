@@ -1,5 +1,4 @@
 -- Reexecutável: apaga na ordem inversa das dependências
-DROP TABLE log_preco CASCADE CONSTRAINTS;
 DROP TABLE movimentacao CASCADE CONSTRAINTS;
 DROP TABLE item_compra CASCADE CONSTRAINTS;
 DROP TABLE compra CASCADE CONSTRAINTS;
