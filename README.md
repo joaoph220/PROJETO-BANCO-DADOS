@@ -15,8 +15,12 @@ Em conversa com o responsável pela empresa, foi relatado que já ocorreu de pro
 O projeto organiza esses dados em um banco relacional consistente e normalizado, capaz de indicar o que precisa ser reposto, identificar produtos sem saída e registrar o histórico de entradas e saídas de cada item, com o motivo. O banco não substitui o ERP: serve como base de apoio ao controle de estoque e à decisão de compra.
 
 ## 2. Usuário / público-alvo
+Usuários de referência: dois perfis, entrevistados durante o projeto.
 
+Responsável comercial (vendas, entregas e compras): decide o que comprar e de qual fornecedor. Usaria o banco para saber quais produtos precisam ser repostos, quais estão parados em estoque e quanto foi gasto com cada fornecedor.
+Responsável administrativo (notas fiscais e financeiro): lança as entradas e saídas de nota, que alteram o estoque. Usaria o banco para registrar compras e movimentações e consultar o histórico de um produto, com a data e o motivo de cada alteração.
 
+Público-alvo: o modelo também serve a outros pequenos comércios que controlam estoque e compras de forma semelhante.
 
 ## 3. Necessidades de informação
 
