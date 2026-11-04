@@ -24,12 +24,13 @@ Público-alvo: o modelo também serve a outros pequenos comércios que controlam
 
 ## 3. Necessidades de informação
 
-- Quais produtos preciso comprar agora?
-- Quanto gastei por fornecedor?
-- Quais categorias concentram mais gastos?
-- Quais produtos nunca tiveram saída?
-- Qual o histórico de entradas e saídas de um produto?
-
+1. Quais produtos estão com estoque igual ou abaixo do mínimo e precisam ser comprados agora, e qual fornecedor os atende?
+2. Quais produtos nunca tiveram saída (estoque parado)?
+3. Quanto foi gasto com cada fornecedor?
+4. Quais categorias concentram mais gastos com compras?
+5. Quais produtos cada fornecedor vende, a que preço de referência e com qual prazo de entrega?
+6. Qual o histórico de entradas e saídas de um produto, e o motivo de cada movimentação?
+7. Quais compras estão abertas e ainda não foram recebidas?
 
 ---
 
