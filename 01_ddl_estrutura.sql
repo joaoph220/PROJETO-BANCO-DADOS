@@ -1,19 +1,12 @@
--- Reexecutável: apaga na ordem inversa das dependências.
--- O bloco ignora o erro ORA-00942 (tabela não existe) na primeira execução.
-BEGIN
-  FOR t IN (SELECT column_value AS nome
-              FROM TABLE(SYS.ODCIVARCHAR2LIST(
-                   'MOVIMENTACAO', 'ITEM_COMPRA', 'COMPRA',
-                   'PRODUTO_FORNECEDOR', 'PRODUTO', 'FORNECEDOR', 'CATEGORIA'))) LOOP
-    BEGIN
-      EXECUTE IMMEDIATE 'DROP TABLE ' || t.nome || ' CASCADE CONSTRAINTS PURGE';
-    EXCEPTION
-      WHEN OTHERS THEN
-        IF SQLCODE != -942 THEN RAISE; END IF;
-    END;
-  END LOOP;
-END;
-/
+-- Reexecutável: apaga na ordem inversa das dependências
+DROP TABLE log_preco CASCADE CONSTRAINTS;
+DROP TABLE movimentacao CASCADE CONSTRAINTS;
+DROP TABLE item_compra CASCADE CONSTRAINTS;
+DROP TABLE compra CASCADE CONSTRAINTS;
+DROP TABLE produto_fornecedor CASCADE CONSTRAINTS;
+DROP TABLE produto CASCADE CONSTRAINTS;
+DROP TABLE fornecedor CASCADE CONSTRAINTS;
+DROP TABLE categoria CASCADE CONSTRAINTS;
 
 CREATE TABLE categoria (
     id_categoria  NUMBER GENERATED ALWAYS AS IDENTITY,
@@ -99,6 +92,6 @@ CREATE TABLE movimentacao (
     CONSTRAINT ck_mov_qtd CHECK (quantidade > 0)
 );
 
--- ALTER TABLE exigido pelo edital: FK adicionada depois
+-- FK adicionada depois
 ALTER TABLE movimentacao
     ADD CONSTRAINT fk_mov_compra FOREIGN KEY (id_compra) REFERENCES compra (id_compra);
