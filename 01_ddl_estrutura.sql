@@ -1,11 +1,18 @@
--- Reexecutável: apaga na ordem inversa das dependências
-DROP TABLE movimentacao CASCADE CONSTRAINTS;
-DROP TABLE item_compra CASCADE CONSTRAINTS;
-DROP TABLE compra CASCADE CONSTRAINTS;
-DROP TABLE produto_fornecedor CASCADE CONSTRAINTS;
-DROP TABLE produto CASCADE CONSTRAINTS;
-DROP TABLE fornecedor CASCADE CONSTRAINTS;
-DROP TABLE categoria CASCADE CONSTRAINTS;
+--O bloco ignora o erro ORA-00942 (tabela não existe) na primeira execução.
+BEGIN
+  FOR t IN (SELECT column_value AS nome
+              FROM TABLE(SYS.ODCIVARCHAR2LIST(
+                   'ARMAZEM','DEPARTAMENTO','DEPENDENTE','FUNCIONARIO',
+                   'GERENTESDEPTO','LOCALIZACAO','LOJA','PROJETO','PROJFUNC'))) LOOP
+    BEGIN
+      EXECUTE IMMEDIATE 'DROP TABLE ' || t.nome || ' CASCADE CONSTRAINTS PURGE';
+    EXCEPTION
+      WHEN OTHERS THEN
+        IF SQLCODE != -942 THEN RAISE; END IF;
+    END;
+  END LOOP;
+END;
+/
 
 CREATE TABLE categoria (
     id_categoria  NUMBER GENERATED ALWAYS AS IDENTITY,
