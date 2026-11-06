@@ -205,7 +205,7 @@ Arquivo: `05_plsql.sql`.
 
 ## 11. Como criar e testar o banco no Oracle
 
-1. Abrir o Oracle Live SQL (ou SQL Developer conectado ao Oracle XE).
+1. Abrir o Oracle FreeSQL.
 2. Executar, nesta ordem, como **script** (não linha por linha):
    1. `01_ddl_estrutura.sql`
    2. `02_dml_carga.sql`
