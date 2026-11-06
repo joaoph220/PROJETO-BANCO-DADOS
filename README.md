@@ -73,7 +73,7 @@ Observação sobre tipos: o modelo lógico usa tipos genéricos (`INT`, `FLOAT`,
 
 ### Ponto de partida: tabela não normalizada
 
-**COMPRA_GERAL** (id_compra, data, nome_fornecedor, cnpj_fornecedor, telefone_fornecedor, id_produto, nome_produto, categoria, descricao_categoria, qtd, preco)
+**COMPRA_GERAL** (id_compra, data, id_fornecedor, nome_fornecedor, cnpj_fornecedor, telefone_fornecedor, id_produto, nome_produto, id_categoria, nome_categoria, qtd, preco)
 
 Essa tabela causa três anomalias:
 
@@ -85,7 +85,7 @@ Essa tabela causa três anomalias:
 
 Cada célula guarda um único valor (atômico) e não há grupos repetidos.
 
-- Errado: uma coluna `produtos` com "arroz, feijão, óleo", ou colunas `produto1`, `produto2`, `produto3`.
+- Errado: uma coluna `produtos` com "desinfetante, detergente, luva", ou colunas `produto1`, `produto2`, `produto3`.
 - Correto: uma linha por produto comprado, com chave composta (`id_compra`, `id_produto`).
 
 ### 2ª Forma Normal (2FN)
@@ -99,8 +99,8 @@ Está na 1FN e nenhum atributo depende de apenas **parte** da chave composta.
 
 Está na 2FN e nenhum atributo não-chave depende de outro atributo não-chave (dependência transitiva).
 
-- Em `PRODUTO`: `id_produto` → categoria → descrição da categoria.
-- Em `COMPRA`: `id_compra` → fornecedor → telefone do fornecedor.
+- Em `PRODUTO`: `id_produto` → `id_categoria` → `nome_categoria`.
+- Em `COMPRA`: `id_compra` → `id_fornecedor` → `telefone_fornecedor`.
 - **Solução:** criar `CATEGORIA` e `FORNECEDOR`, mantendo apenas a chave estrangeira nas outras tabelas.
 
 O N:M entre Fornecedor e Produto também foi resolvido em `PRODUTO_FORNECEDOR`: preço de referência e prazo de entrega dependem do **par** produto + fornecedor, e não de um só.
