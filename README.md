@@ -18,10 +18,10 @@ O projeto organiza esses dados em um banco relacional consistente e normalizado,
 
 Usuários de referência: dois perfis, entrevistados durante o projeto.
 
-Responsável comercial (vendas, entregas e compras): decide o que comprar e de qual fornecedor. Usaria o banco para saber quais produtos precisam ser repostos, quais estão parados em estoque e quanto foi gasto com cada fornecedor.
-Responsável administrativo (notas fiscais e financeiro): lança as entradas e saídas de nota, que alteram o estoque. Usaria o banco para registrar compras e movimentações e consultar o histórico de um produto, com a data e o motivo de cada alteração.
+- **Responsável comercial** (vendas, entregas e compras): decide o que comprar e de qual fornecedor. Usaria o banco para saber quais produtos precisam ser repostos, quais estão parados em estoque e quanto foi gasto com cada fornecedor.
+- **Responsável administrativo** (notas fiscais e financeiro): lança as entradas e saídas de nota, que alteram o estoque. Usaria o banco para registrar compras e movimentações e consultar o histórico de um produto, com a data e o motivo de cada alteração.
 
-Público-alvo: o modelo também serve a outros pequenos comércios que controlam estoque e compras de forma semelhante.
+**Público-alvo:** o modelo também serve a outros pequenos comércios que controlam estoque e compras de forma semelhante.
 
 ## 3. Necessidades de informação
 
@@ -145,7 +145,7 @@ O N:M entre Fornecedor e Produto também foi resolvido em `PRODUTO_FORNECEDOR`: 
 | movimentacao | id_movimentacao | NUMBER | Não | PK | Identity |
 | movimentacao | id_produto | NUMBER | Não | FK → produto | RN6 |
 | movimentacao | tipo | VARCHAR2(7) | Não | | RN9 |
-| movimentacao | motivo | VARCHAR2(30) | Sim | | Ex.: venda, compra, perda |
+| movimentacao | motivo | VARCHAR2(30) | Sim | | Ex.: COMPRA, VENDA, AJUSTE |
 | movimentacao | quantidade | NUMBER(10) | Não | | RN5, RN8 |
 | movimentacao | data | DATE | Não | | Default SYSDATE |
 | movimentacao | id_compra | NUMBER | Sim | FK → compra | RN6; nulo em saída por venda |
@@ -163,37 +163,43 @@ O N:M entre Fornecedor e Produto também foi resolvido em `PRODUTO_FORNECEDOR`: 
 | RN5 | A quantidade de um item de compra ou movimentação deve ser maior que zero | Declarativa: `CHECK (quantidade > 0)` |
 | RN6 | Não existe produto sem categoria, compra sem fornecedor, item sem compra e produto, nem movimentação sem produto | Referencial: `FOREIGN KEY` + `NOT NULL` |
 | RN7 | Estoque atual e estoque mínimo nunca podem ser negativos | Declarativa: `CHECK` em `produto` |
-| RN8 | Uma saída não pode ser maior que o saldo em estoque | PL/SQL: trigger em `movimentacao` |
+| RN8 | Uma saída não pode ser maior que o saldo em estoque | PL/SQL: trigger `trg_movimentacao_estoque` |
 | RN9 | O tipo da movimentação é apenas ENTRADA ou SAIDA | Declarativa: `CHECK` |
 | RN10 | O status da compra é apenas ABERTA, RECEBIDA ou CANCELADA | Declarativa: `CHECK` |
-| RN11 | Toda compra deve ter ao menos um item | PL/SQL: procedure `registrar_compra` |
+| RN11 | Toda compra registrada pela procedure nasce com ao menos um item | PL/SQL: procedure `registrar_compra` |
+
+Cada regra tem um teste (um comando que passa e outro que é bloqueado) no arquivo `06_testes.sql`.
 
 ---
 
 ## 9. Consultas e perguntas de negócio
 
+Arquivo: `04_consultas.sql`.
+
 | # | Pergunta de negócio | Recursos usados |
 |---|---|---|
 | 1 | Quais produtos ativos custam mais de R$ 20, do mais caro ao mais barato? | SELECT, WHERE, ORDER BY |
 | 2 | Qual o nome e a categoria de cada produto? | JOIN |
-| 3 | Quais produtos cada fornecedor me vendeu e a que preço? | JOIN de 3 tabelas |
-| 4 | Quanto gastei por fornecedor? | SUM, GROUP BY |
-| 5 | Quais categorias gastaram mais de R$ 1.000 em compras? | GROUP BY, HAVING |
-| 6 | Quais produtos nunca tiveram saída? | Subconsulta |
-| 7 | Qual o histórico de entradas e saídas de um produto? | UNION |
-| 8 | O que preciso comprar agora, e de qual fornecedor? | JOIN, filtro `estoque_atual <= estoque_minimo` |
+| 3 | Quais produtos cada fornecedor vende, a que preço de referência e com qual prazo? | JOIN de 3 tabelas |
+| 4 | Quanto foi gasto com cada fornecedor e quantas compras foram feitas? | SUM, COUNT, GROUP BY |
+| 5 | Quais categorias concentram gastos acima de R$ 3.000 em compras recebidas? | GROUP BY, HAVING |
+| 6 | Quais produtos ativos nunca tiveram saída (estoque parado)? | Subconsulta (NOT EXISTS) |
+| 6B | Quais produtos estão com estoque abaixo da média geral? | Subconsulta escalar (AVG) |
+| 7 | Qual o histórico unificado de entradas e saídas de cada produto? | UNION |
+| 8 | O que precisa ser comprado agora, de qual fornecedor (menor preço) e em quantos dias ele entrega? | JOIN, LEFT JOIN, subconsulta correlacionada |
+| 9 | Quais compras estão abertas, com qual fornecedor e qual valor previsto? | JOIN, GROUP BY, SUM |
 
-[Ajustar esta tabela conforme as consultas finais do arquivo `04_consultas.sql`.]
+Nas consultas de gasto (4, 5 e 7), só entram compras com status `RECEBIDA`: compras abertas ou canceladas não geraram despesa nem entrada de estoque.
 
 ## 10. Objetos PL/SQL
 
+Arquivo: `05_plsql.sql`.
+
 | Objeto | Tipo | Finalidade |
 |---|---|---|
-| `registrar_compra` | Procedure | Registra uma compra e seus itens em uma única operação, com rollback em caso de erro (RN11) |
-| `fn_situacao_estoque` | Function | Retorna 'CRÍTICO', 'ATENÇÃO' ou 'OK' conforme o estoque atual e o mínimo; pode ser usada em um SELECT |
-| `trg_movimentacao_estoque` | Trigger | Após INSERT em `movimentacao`, soma ou subtrai do `estoque_atual`; bloqueia saída maior que o saldo (RN8) |
-
-[Ajustar nomes e descrições conforme o arquivo `05_plsql.sql`.]
+| `trg_movimentacao_estoque` | Trigger | Antes de cada INSERT em `movimentacao`, soma (ENTRADA) ou subtrai (SAIDA) do `estoque_atual` do produto; bloqueia saída maior que o saldo com o erro ORA-20001 (RN8) |
+| `fn_situacao_estoque` | Function | Retorna 'CRITICO' (estoque <= mínimo), 'ATENCAO' (até 50% acima do mínimo) ou 'OK'; devolve NULL se o produto não existe; pode ser usada em um SELECT |
+| `registrar_compra` | Procedure | Registra uma compra recebida de um produto: cria a compra, o item e a movimentação de ENTRADA em uma única transação, com rollback em caso de erro (RN11) |
 
 ---
 
@@ -213,12 +219,24 @@ O N:M entre Fornecedor e Produto também foi resolvido em `PRODUTO_FORNECEDOR`: 
 SELECT table_name FROM user_tables ORDER BY table_name;
 ```
 
-Observação: na primeira execução do `01_ddl_estrutura.sql`, os erros `ORA-00942` nos comandos `DROP TABLE` são esperados, pois as tabelas ainda não existem.
+Observações:
+
+- O `01_ddl_estrutura.sql` começa apagando as tabelas do projeto, então pode ser executado quantas vezes for preciso para reconstruir o banco do zero. O bloco ignora o erro ORA-00942 (tabela não existe) na primeira execução.
+- O `02_dml_carga.sql` só roda com as tabelas vazias; se já houver dados, ele avisa para executar o `01` antes.
+- A carga insere o `estoque_atual` de cada produto já calculado (entradas menos saídas), porque a trigger só é criada no `05_plsql.sql`. Ao final do `02`, a conferência 2 confirma que `estoque_atual` bate com a soma das movimentações.
+- Contagem esperada de linhas depois do `02`: categoria 7, fornecedor 7, produto 25, produto_fornecedor 28, compra 13, item_compra 37, movimentacao 65. Depois do `03`: compra 12 e item_compra 36 (as demais não mudam).
+- O `06_testes.sql` gera erros de propósito (comandos marcados "DEVE FALHAR"). O teste da procedure faz COMMIT e fica por último; para limpar a base, execute `01` e `02` de novo.
 
 ## 12. Estrutura do repositório
 
 ```text
-/docs      modelo_conceitual_der.pdf, modelo_logico_der.pdf
-/scripts   01_ddl_estrutura.sql a 06_testes.sql
+01_ddl_estrutura.sql
+02_dml_carga.sql
+03_dml_operacoes.sql
+04_consultas.sql
+05_plsql.sql
+06_testes.sql
+modelo_conceitual_der.pdf
+modelo_logico_der.pdf
 README.md
 ```
