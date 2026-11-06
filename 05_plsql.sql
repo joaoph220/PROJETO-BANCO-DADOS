@@ -84,6 +84,8 @@ CREATE OR REPLACE PROCEDURE registrar_compra (
 IS
     v_id_compra compra.id_compra%TYPE;
 BEGIN
+    SAVEPOINT sp_registrar_compra;
+    
     IF p_quantidade <= 0 THEN
         RAISE_APPLICATION_ERROR(-20002, 'A quantidade deve ser maior que zero.');
     END IF;
@@ -98,11 +100,9 @@ BEGIN
     INSERT INTO movimentacao (id_produto, tipo, motivo, quantidade, id_compra)
     VALUES (p_id_produto, 'ENTRADA', 'COMPRA', p_quantidade, v_id_compra);
 
-    COMMIT;
-
 EXCEPTION
     WHEN OTHERS THEN
-        ROLLBACK;
+        ROLLBACK TO sp_registrar_compra;
         RAISE;
 END;
 /
