@@ -188,6 +188,8 @@ BEGIN
 END;
 /
 
+COMMIT;
+
 -- Resultado: estoque 15 e situacao OK
 SELECT nome, estoque_atual, estoque_minimo,
        fn_situacao_estoque(id_produto) AS situacao
